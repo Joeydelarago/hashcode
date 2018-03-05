@@ -9,8 +9,8 @@ totalsteps = 0
 
 
 
-def distance(x, y):
-    return abs(x[0] - y[0]) + abs(x[1] - y[1])
+def distance(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 class Vehicle:
     def __init__(self):
@@ -114,10 +114,10 @@ def read_input_file(file):
 
 
 def create_output_file(mapp):
-    out_file = open('loge', 'w')
-    print(mapp.vehicles)
+    out_file = open('logc', 'w')
+    #print(mapp.vehicles)
     for vehicle in mapp.vehicles:
-        print(vehicle.completedRides)
+        #print(vehicle.completedRides)
         #line = number of completed rides for one vehicle
         ln = str(len(vehicle.completedRides)) + " "
 
@@ -189,13 +189,13 @@ class Map(object):
         while True:
                                 #if length > 20, only choose 20, else choose all
                                                               #there are valid rides
-            if array_pointer > min(20,len(self.rides)-1) and len(valid_rides) > 0:
+            if array_pointer > min(10,len(self.rides)-1) and len(valid_rides) > 0:
                 #print('we broke')
                 break
             cr = self.rides[array_pointer]
             array_pointer += 1
             #checks if it can reach the ride before its last possible pickup time.
-            if distance(cv.ride.finishpoint, cr.startpoint) + cv.next_free <= cr.latestfinish - cr.distance:
+            if distance(cv.ride.finishpoint, cr.startpoint) + cv.next_free + cr.distance < cr.latestfinish:
                 valid_rides.append(cr)
             if array_pointer == len(self.rides)-1  and len(valid_rides) == 0:
                 self.finished_vehicles.append(cv)
@@ -224,7 +224,7 @@ class Map(object):
 
 #might be wrong
 def main():
-    city_map = read_input_file("e_high_bonus.in")
+    city_map = read_input_file("c_no_hurry.in")
     while city_map.curtime < city_map.totalsteps:
         #while there are vehicles left and while the
         #first vehicle in the list is
