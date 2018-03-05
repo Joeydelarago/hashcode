@@ -49,12 +49,6 @@ class Vehicle:
         return "Current Position: %s, Next Free: %s, Completed Rides: %s, Current Ride: %s" % (self.currentPos, self.next_free, self.completedRides, self.ride)
 
 
-
-
-
-
-
-
 class Ride:
     def __init__(self,ID,startpoint,finishpoint,earlieststart,latestfinish):
         self.ID = ID
@@ -63,6 +57,9 @@ class Ride:
         self.earlieststart = earlieststart
         self.latestfinish = latestfinish
         self.distance = distance(startpoint, finishpoint)
+
+    def __eq__(self,other):
+        return self.ID == other.ID
 
     def getID(self):
         return self.ID
@@ -122,10 +119,10 @@ def create_output_file(mappyboi):
     for i in mappyboi.vehicles:
         ln=str(len(i.completedRides))+" "
         for n in i.completedRides:
-            print('Completed Rides: %s' % n)
+            #print('Completed Rides: %s' % n)
             ln+=str(n)+" "
         out_file.write(ln +'\n')
-    print(mappyboi.finished_vehicles)
+    #print(mappyboi.finished_vehicles)
     for i in mappyboi.finished_vehicles:
         numRides = len(i.completedRides)
         ln=str(numRides)+" "
@@ -149,6 +146,7 @@ class Map(object):
         self.curtime = 0
         self.finished_vehicles = []
 
+    #might be wrong
     def addVehicle(self, vehicle):
         time_till_available = vehicle.getNextFree()
         #print(vehicle)
@@ -170,67 +168,79 @@ class Map(object):
     def getRides(self):
         return self.rides
 
-
     def calculate_points(self, car, ride):
-        if distance(car.ride.finishpoint, ride.startpoint) + car.next_free < ride.earlieststart:
+        # time between when the car finishes and the ride starts, and the time the cars free is less than the
+        #earlieststart, you get the bonus point.
+        if distance(car.ride.finishpoint, ride.startpoint) + car.next_free <= ride.earlieststart:
             points = ride.distance + self.startbonus
         else:
             points = ride.distance
         return points
 
+    #might be wrong
     def calculate_best_ride(self, vehicle):
         valid_rides = []
         array_pointer = 0
         cv = vehicle
+
+        #get a list of rides it could take
         while True:
-            if array_pointer >= min(20,len(self.rides)-1) and len(valid_rides) > 0:
+                                #if length > 20, only choose 20, else choose all
+                                                              #there are valid rides
+            if array_pointer > min(20,len(self.rides)-1) and len(valid_rides) > 0:
                 #print('we broke')
                 break
             cr = self.rides[array_pointer]
-            #checks if it can reach the ride before its last possible pickup time.
-            if distance(cv.ride.finishpoint, cr.startpoint) + cv.next_free < cr.latestfinish - cr.distance:
-                valid_rides.append(cr)
             array_pointer +=1
-            if array_pointer == len(self.rides) and len(valid_rides) == 0:
-                #print("end_vehicle")
+            #checks if it can reach the ride before its last possible pickup time.
+            if distance(cv.ride.finishpoint, cr.startpoint) + cv.next_free <= cr.latestfinish - cr.distance:
+                valid_rides.append(cr)
+            else:
+                continue
+            if array_pointer == len(self.rides)  and len(valid_rides) == 0:
                 self.finished_vehicles.append(cv)
                 return
 
         best_ride = valid_rides.pop()
+        #finds the best ride for the current vehicle.
         for ride in valid_rides:
             if self.calculate_points(cv, ride) > self.calculate_points(cv, best_ride):
                 best_ride = ride
-        #roeioeuioeuioeuioo
-        wait_time = (distance(cv.ride.finishpoint, best_ride.startpoint)) -  (best_ride.earlieststart - self.curtime)
+                                #transit period
+        transit_period = distance(cv.ride.finishpoint, best_ride.startpoint)
+        wait_time = (transit_period) -  (best_ride.earlieststart - self.curtime)
         if wait_time > 0:
-            cv.setNextFree(self.curtime + wait_time + distance(cv.ride.finishpoint, best_ride.startpoint) + best_ride.distance)
+            cv.setNextFree(self.curtime + transit_period + wait_time + best_ride.distance)
         else:
-            cv.setNextFree(self.curtime + distance(cv.ride.finishpoint, best_ride.startpoint) + best_ride.distance)
-        print('current vehicle next_free %s' % cv.next_free)
+            cv.setNextFree(self.curtime + transit_period + best_ride.distance)
 
         cv.setRide(best_ride)
+        print('All Rides:')
+        print(len(self.rides))
         self.rides.remove(best_ride)
-        #print(best_ride)
+        print('After: ')
+        print(len(self.rides))
         self.addVehicle(cv)
+
 
     def incerementTime(self):
         self.curtime +=1
 
-
+#might be wrong
 def main():
-    city_map = read_input_file("b_should_be_easy.in")
+    city_map = read_input_file("a_example.in")
     while city_map.curtime < city_map.totalsteps:
         while len(city_map.vehicles) > 0 and city_map.vehicles[-1].next_free == city_map.curtime:
             if len(city_map.rides) == 0:
-                print('len of city_map.rides is 0')
+                #print('len of city_map.rides is 0')
                 break
             car = city_map.vehicles.pop()
-            print(car)
+            #print(car)
             if car.ride.distance != 0:
                 car.completedRides += [car.ride.ID]
             city_map.calculate_best_ride(car)
-            print("length of city map vehicles: ", end='')
-            print(len(city_map.vehicles))
+            #print("length of city map vehicles: ", end='')
+            #print(len(city_map.vehicles))
         city_map.incerementTime()
     create_output_file(city_map)
 
