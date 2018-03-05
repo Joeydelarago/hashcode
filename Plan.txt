@@ -1,0 +1,48 @@
+Parts:
+vehicle starts + ends in intersection
+Idea, explination
+
+
+Functions:
+Funct(variables): explination
+CheckValidity(vehicle, customer): if its possible to get to the
+  destination in time
+
+ChooseBestRide(vehicle):
+
+CalculatePoints(Vehicle, Ride):
+
+DrivetoDest(destination): drives to destination
+
+Classes:
+class(variables): explanation
+
+
+vehicle:
+  __init__: coords, destination,
+
+
+Sam:
+input
+Evan:
+vehicle ride classes
+
+
+Joey:
+
+Jack:
+class for map
+
+
+WHAT WE DID WRONG:
+Proper planning with uml and assign work to people.
+get better at communicating stuff(DON'T SAY STUFF OR SOMETHING OR THAT OR IT)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Follow PEP 8 - Download linter?
+figure out how we can all run the program. Test individual Functions
+Jack get python working
+don't get distracted by the snow / beyblades / memes
+be aware of time
+Use paint program we can all see at the same time. draw.io?
+Practice in g.19 maybe?
+do funner more satisfying problems
