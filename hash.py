@@ -113,24 +113,26 @@ def read_input_file(file):
     return city_map
 
 
-def create_output_file(mappyboi):
-    #print("total length of cars outputted" +str(len(mappyboi.vehicles) + len(mappyboi.finished_vehicles)))
-    out_file = open('log', 'w')
-    for i in mappyboi.vehicles:
-        ln=str(len(i.completedRides))+" "
-        for n in i.completedRides:
-            #print('Completed Rides: %s' % n)
-            ln+=str(n)+" "
-        out_file.write(ln +'\n')
-    #print(mappyboi.finished_vehicles)
-    for i in mappyboi.finished_vehicles:
+def create_output_file(mapp):
+    out_file = open('loge', 'w')
+    print(mapp.vehicles)
+    for vehicle in mapp.vehicles:
+        print(vehicle.completedRides)
+        #line = number of completed rides for one vehicle
+        ln = str(len(vehicle.completedRides)) + " "
+
+        for rideID in vehicle.completedRides:
+            ln += str(rideID) + " "
+        out_file.write(ln + '\n')
+
+    for i in mapp.finished_vehicles:
         numRides = len(i.completedRides)
-        ln=str(numRides)+" "
-        #print(ln)
+        ln = str(numRides) + " "
+
         for n in i.completedRides:
-            #print(n)
-            ln+=str(n)+" "
-        out_file.write(ln +'\n')
+            ln += str(n) + " "
+
+        out_file.write(ln + '\n')
     out_file.close()
 
 
@@ -154,12 +156,12 @@ class Map(object):
             self.vehicles += [vehicle]
         else:
             for i in range(len(self.vehicles)):
-                if self.vehicles[i].getNextFree() > time_till_available:
+                if self.vehicles[i].getNextFree() < time_till_available:
                     #print('if statement works')
                     #right here bois
-                    self.vehicles.insert(i+1, vehicle)
+                    self.vehicles.insert(i, vehicle)
                     return
-            self.vehicles.insert(0, vehicle)
+            self.vehicles.insert(vehicle)
 
 
     def getVehicles(self):
@@ -191,13 +193,11 @@ class Map(object):
                 #print('we broke')
                 break
             cr = self.rides[array_pointer]
-            array_pointer +=1
+            array_pointer += 1
             #checks if it can reach the ride before its last possible pickup time.
             if distance(cv.ride.finishpoint, cr.startpoint) + cv.next_free <= cr.latestfinish - cr.distance:
                 valid_rides.append(cr)
-            else:
-                continue
-            if array_pointer == len(self.rides)  and len(valid_rides) == 0:
+            if array_pointer == len(self.rides)-1  and len(valid_rides) == 0:
                 self.finished_vehicles.append(cv)
                 return
 
@@ -215,11 +215,7 @@ class Map(object):
             cv.setNextFree(self.curtime + transit_period + best_ride.distance)
 
         cv.setRide(best_ride)
-        print('All Rides:')
-        print(len(self.rides))
         self.rides.remove(best_ride)
-        print('After: ')
-        print(len(self.rides))
         self.addVehicle(cv)
 
 
@@ -228,16 +224,21 @@ class Map(object):
 
 #might be wrong
 def main():
-    city_map = read_input_file("a_example.in")
+    city_map = read_input_file("e_high_bonus.in")
     while city_map.curtime < city_map.totalsteps:
+        #while there are vehicles left and while the
+        #first vehicle in the list is
+        #free at the current time
         while len(city_map.vehicles) > 0 and city_map.vehicles[-1].next_free == city_map.curtime:
+            #if there are rides to pick up
             if len(city_map.rides) == 0:
                 #print('len of city_map.rides is 0')
                 break
             car = city_map.vehicles.pop()
-            #print(car)
+            #if it is assigned
             if car.ride.distance != 0:
                 car.completedRides += [car.ride.ID]
+
             city_map.calculate_best_ride(car)
             #print("length of city map vehicles: ", end='')
             #print(len(city_map.vehicles))
